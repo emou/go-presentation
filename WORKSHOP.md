@@ -52,8 +52,8 @@ $ touch main.go
 package main
 
 import (
-"fmt"
-"net"
+	"fmt"
+	"net"
 )
 
 func clientloop() {
@@ -61,12 +61,14 @@ func clientloop() {
 
 func main() {
   serverAddr := "35.156.83.78:8080"
-  _, err := net.Dial("tcp", serverAddr)
+  conn, err := net.Dial("tcp", serverAddr)
   if err != nil {
     panic(fmt.Sprintf("Error connectinng to %s: %s", serverAddr, err))
   }
-  clientloop()
+	defer conn.Close()
+
   fmt.Printf("Connected to %s", serverAddr)
+  clientloop()
 }
 ```
 
@@ -76,13 +78,12 @@ $ go run main.go
 Connected to 35.156.83.78:8080
 ```
 
-Оттук нататък задачата ви е в `clientloop` да:
+Оттук нататък задачата ви е в `clientloop` да имплементирате версия на `netcat`
+инструмента, тоест:
 
-- Пуснете горутина, която в цикъл (до грешка) да чете от `conn`, използвайки `bufio.NewReader(conn).ReadString('\n')`
-- В главната горутина четете от терминала с `bufio.NewReader(os.Stdin)` и пишете в `conn` чрез `bufio.NewWriter(conn).Write([]byte(msg))`. Не забравяйте да използвате `Flush` метода на `bufio.Writer`.
+- Пуснете горутина, която да чете от `conn` и да копира в `os.Stdout`, използвайки `io.Copy`.
+- В главната горутина четете от терминала (`os.Stdin`) и записвайте в `conn`, отново използвайки `io.Copy`.
 
 Линкове към документация на пкетите:
-- https://golang.org/pkg/bufio/
+- https://golang.org/pkg/io/
 - https://golang.org/pkg/net/
-- https://golang.org/pkg/fmt/
-- https://golang.org/pkg/os/
