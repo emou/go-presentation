@@ -90,7 +90,7 @@ func (game *Game) startMatch(action Action) {
 	waiting := game.getOpponent(action.player)
 	if waiting == nil {
 		game.addWaiting(action.player)
-		action.player.WriteMsg("waiting for another player...\n")
+		fmt.Printf("Player %s waiting ...", action.player.Name)
 		action.player.State = STATE_WAITING
 	} else {
 
@@ -149,5 +149,4 @@ func (game *Game) removeWaiting(player *Player) {
 			return
 		}
 	}
-
 }

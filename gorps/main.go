@@ -2,58 +2,18 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
 	"github.com/emou/go-presentation/gorps/rps"
 	"net"
-	"strings"
 )
-
-type Message struct {
-	Params map[string]string
-}
-
-func writeMsg(writer *bufio.Writer, params map[string]string) error {
-	msg := Message{Params: params}
-
-	b, err := json.Marshal(msg)
-	if err != nil {
-		return err
-	}
-	b = append(b, '\n')
-
-	_, err = writer.Write(b)
-	if err != nil {
-		return err
-	}
-	return writer.Flush()
-}
-
-func readMsg(reader *bufio.Reader) (*Message, error) {
-	msgString, err := reader.ReadString('\n')
-	if err != nil {
-		return nil, err
-	}
-	msgString = strings.TrimSpace(msgString)
-	if err != nil {
-		return nil, err
-	}
-
-	msg := &Message{}
-	err = json.Unmarshal([]byte(msgString), msg)
-	if err != nil {
-		return nil, err
-	}
-	return msg, nil
-}
 
 func login(reader *bufio.Reader, writer *bufio.Writer) (string, error) {
 	for {
-		err := writeMsg(writer, map[string]string{"name": "login"})
+		err := rps.WriteMsg(writer, map[string]string{"name": "login"})
 		if err != nil {
 			return "", err
 		}
-		msg, err := readMsg(reader)
+		msg, err := rps.ReadMsg(reader)
 		if err != nil {
 			return "", err
 		}
@@ -116,10 +76,10 @@ func main() {
 	game := rps.NewGame()
 	listener, err := net.Listen("tcp", ":9000")
 
-	fmt.Println("Listening on", listener.Addr())
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println("Listening on", listener.Addr())
 
 	for {
 		conn, err := listener.Accept()
