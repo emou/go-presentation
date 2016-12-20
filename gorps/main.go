@@ -9,7 +9,7 @@ import (
 
 func login(reader *bufio.Reader, writer *bufio.Writer) (string, error) {
 	for {
-		err := rps.WriteMsg(writer, map[string]string{"name": "login"})
+		err := rps.WriteMsg(writer, &rps.Message{Type: "login"})
 		if err != nil {
 			return "", err
 		}
@@ -43,7 +43,7 @@ func serve(conn net.Conn, game *rps.Game) error {
 		for {
 			select {
 			case msg := <-player.Messages:
-				_, err := writer.Write([]byte(msg))
+				err := rps.WriteMsg(writer, &msg)
 				if err != nil {
 					fmt.Println(err)
 					return
@@ -67,9 +67,9 @@ func serve(conn net.Conn, game *rps.Game) error {
 
 		if msg.Params["name"] != "action" {
 			game.RemovePlayer(player)
-			return rps.WriteMsg(writer, map[string]string{
-				"name":    "error",
-				"message": fmt.Sprintf("Unexpected message: %+v", msg),
+			return rps.WriteMsg(writer, &rps.Message{
+				Type:   "error",
+				Params: map[string]string{"message": fmt.Sprintf("Unexpected message: %+v", msg)},
 			})
 		}
 

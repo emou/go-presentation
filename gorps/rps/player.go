@@ -1,7 +1,6 @@
 package rps
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -14,12 +13,12 @@ type Player struct {
 	Name     string
 	State    string
 	action   chan string
-	Messages chan string
+	Messages chan Message
 	Finish   chan string
 }
 
 func NewPlayer(name string) *Player {
-	return &Player{Name: name, action: make(chan string), Messages: make(chan string), Finish: make(chan string), State: STATE_NEW}
+	return &Player{Name: name, action: make(chan string), Messages: make(chan Message), Finish: make(chan string), State: STATE_NEW}
 }
 
 // Act dispatches a user action
@@ -28,13 +27,7 @@ func (p *Player) Act(message string) {
 }
 
 // WriteMsg sends a message to the user
-func (p *Player) WriteMsg(message string) {
-	// TODO: Remove this defer
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Println("failed to write message: ", message, r)
-		}
-	}()
+func (p *Player) WriteMsg(message Message) {
 	p.Messages <- message
 }
 

@@ -10,7 +10,7 @@ var ROCK = 0
 var PAPER = 1
 var SCISSORS = 2
 
-const MSG_WEAPON = "Choose your weapon (1: rock, 2:paper, 3:scissors): "
+const MSG_CHOOSE = "CHOOSE"
 
 var MSG_MAP = map[int]string{
 	0: "rock",
@@ -25,7 +25,7 @@ var ACT_MAP = map[string]int{
 }
 
 // msgPlayers messages all players with a message
-func msgPlayers(msg string, players ...*Player) {
+func msgPlayers(msg Message, players ...*Player) {
 	for _, player := range players {
 		player.WriteMsg(msg)
 	}
@@ -82,20 +82,20 @@ func (m *Match) checkWinner() (*Player, *Player) {
 func (m *Match) start() {
 	fmt.Println("Begin match ", m.id)
 	defer fmt.Println("End match ", m.id)
-	msgPlayers(MSG_WEAPON, m.player1, m.player2)
+	msgPlayers(Message{Type: MSG_CHOOSE}, m.player1, m.player2)
 
 	for {
 		select {
 		case action := <-m.player1.action:
 			m.decision1 = m.handlePlayerAction(m.player1, action)
 			if m.decision1 == nil {
-				msgPlayers(MSG_WEAPON, m.player1)
+				msgPlayers(Message{Type: MSG_CHOOSE}, m.player1)
 			}
 
 		case action := <-m.player2.action:
 			m.decision2 = m.handlePlayerAction(m.player2, action)
 			if m.decision2 == nil {
-				msgPlayers(MSG_WEAPON, m.player2)
+				msgPlayers(Message{Type: MSG_CHOOSE}, m.player2)
 			}
 		case <-m.player1.Finish:
 			m.game.EndMatch(m.player2, "win")
@@ -105,17 +105,22 @@ func (m *Match) start() {
 			return
 		default:
 			if m.decision1 != nil && m.decision2 != nil {
-				choices := fmt.Sprintf(
-					"%s chose %s and %s chose %s...\n",
-					m.player1.Name, MSG_MAP[*m.decision1],
-					m.player2.Name, MSG_MAP[*m.decision2],
-				)
-				msgPlayers(choices, m.player1, m.player2)
+				msgPlayers(Message{
+					Type: "choices",
+					Params: map[string]string{
+						m.player1.Name: MSG_MAP[*m.decision1],
+						m.player2.Name: MSG_MAP[*m.decision2],
+					},
+				}, m.player1, m.player2)
 
 				winner, loser := m.checkWinner()
 				if winner == nil && loser == nil {
-					msgPlayers("Its a TIE...\n", m.player1, m.player2)
-					msgPlayers(MSG_WEAPON, m.player1, m.player2)
+					msgPlayers(Message{
+						Type: "tie",
+					})
+					msgPlayers(Message{
+						Type: MSG_CHOOSE,
+					}, m.player1, m.player2)
 
 					m.decision1 = nil
 					m.decision2 = nil

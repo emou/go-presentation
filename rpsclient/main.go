@@ -11,11 +11,12 @@ import (
 )
 
 type Message struct {
+	Type   string
 	Params map[string]string
 }
 
-func writeMsg(writer *bufio.Writer, msg map[string]string) error {
-	b, err := json.Marshal(Message{Params: msg})
+func writeMsg(writer *bufio.Writer, msg *Message) error {
+	b, err := json.Marshal(msg)
 	if err != nil {
 		return err
 	}
@@ -26,24 +27,27 @@ func writeMsg(writer *bufio.Writer, msg map[string]string) error {
 	return writer.Flush()
 }
 
-func readMsg(reader *bufio.Reader) (map[string]string, error) {
+func readMsg(reader *bufio.Reader) (*Message, error) {
 	msgString, err := reader.ReadString('\n')
 	if err != nil {
 		return nil, err
 	}
 	msgString = strings.TrimSpace(msgString)
 
-	msg := Message{}
-	err = json.Unmarshal([]byte(msgString), &msg)
+	msg := &Message{}
+	err = json.Unmarshal([]byte(msgString), msg)
 	if err != nil {
 		return nil, err
 	}
 
-	return msg.Params, nil
+	return msg, nil
 }
 
 func login(writer *bufio.Writer, user string, password string) {
-	msg := map[string]string{"name": "login", "username": user, "password": password}
+	msg := &Message{
+		Type:   "login",
+		Params: map[string]string{"username": user, "password": password},
+	}
 	err := writeMsg(writer, msg)
 	if err != nil {
 		panic(fmt.Sprintf("Error logging in: %s", err))
@@ -58,7 +62,7 @@ func clientLoop(user string, password string, reader *bufio.Reader, writer *bufi
 			fmt.Printf("Lost connection to server: %s\n", err)
 			return
 		}
-		switch msg["name"] {
+		switch msg.Type {
 		case "login":
 			login(writer, user, password)
 		default:

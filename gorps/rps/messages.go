@@ -7,12 +7,11 @@ import (
 )
 
 type Message struct {
+	Type   string
 	Params map[string]string
 }
 
-func WriteMsg(writer *bufio.Writer, params map[string]string) error {
-	msg := Message{Params: params}
-
+func WriteMsg(writer *bufio.Writer, msg *Message) error {
 	b, err := json.Marshal(msg)
 	if err != nil {
 		return err

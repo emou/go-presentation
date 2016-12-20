@@ -94,7 +94,13 @@ func (game *Game) startMatch(action Action) {
 		action.player.State = STATE_WAITING
 	} else {
 
-		var msg = fmt.Sprintf("Duel between %s and %s. FIGHT!\n", waiting.Name, action.player.Name)
+		msg := Message{
+			Type: "match",
+			Params: map[string]string{
+				"player1": waiting.Name,
+				"player2": action.player.Name,
+			},
+		}
 		waiting.WriteMsg(msg)
 		action.player.WriteMsg(msg)
 
@@ -113,7 +119,12 @@ func (game Game) StartMatch(player *Player) {
 
 // endMatch handles request to end a new match
 func (game *Game) endMatch(action Action) {
-	action.player.WriteMsg(fmt.Sprintf("You %s \n", action.param))
+	action.player.WriteMsg(Message{
+		Type: "endmatch",
+		Params: map[string]string{
+			"outcome": action.param,
+		},
+	})
 	win := action.param == "win"
 	game.scores.Add(action.player.Name, win)
 	game.startMatch(action)
