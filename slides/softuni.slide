@@ -627,3 +627,10 @@ int и uint са най-ефективния или естествен разм�
 	$ go build hello
 	$ ./hello
 	Здравей, свят!
+
+* Полезни връзки
+.link https://golang.org/
+.link https://golang.org/doc/faq
+.link https://play.golang.org/
+.link http://go-search.org/
+.link https://www.amazon.com/Programming-Language-Addison-Wesley-Professional-Computing/dp/0134190440
