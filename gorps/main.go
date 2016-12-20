@@ -2,35 +2,54 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"github.com/emou/go-presentation/gorps/rps"
 	"net"
 	"strings"
 )
 
-func writeMsg(writer *bufio.Writer, msg string) error {
-	_, err := writer.Write([]byte(msg + "\n"))
+type Message struct {
+	Params map[string]string
+}
+
+func writeMsg(writer *bufio.Writer, params map[string]string) error {
+	msg := Message{Params: params}
+
+	b, err := json.Marshal(msg)
+	if err != nil {
+		return err
+	}
+	b = append(b, '\n')
+
+	_, err = writer.Write(b)
 	if err != nil {
 		return err
 	}
 	return writer.Flush()
 }
 
-func readMsg(reader *bufio.Reader) (string, error) {
-	msg, err := reader.ReadString('\n')
+func readMsg(reader *bufio.Reader) (*Message, error) {
+	msgString, err := reader.ReadString('\n')
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	msg = strings.TrimSpace(msg)
+	msgString = strings.TrimSpace(msgString)
 	if err != nil {
-		return "", err
+		return nil, err
+	}
+
+	msg := &Message{}
+	err = json.Unmarshal([]byte(msgString), msg)
+	if err != nil {
+		return nil, err
 	}
 	return msg, nil
 }
 
-func readPlayerName(reader *bufio.Reader, writer *bufio.Writer) (string, error) {
+func login(reader *bufio.Reader, writer *bufio.Writer) (string, error) {
 	for {
-		err := writeMsg(writer, "LOGIN")
+		err := writeMsg(writer, map[string]string{"name": "login"})
 		if err != nil {
 			return "", err
 		}
@@ -38,7 +57,7 @@ func readPlayerName(reader *bufio.Reader, writer *bufio.Writer) (string, error) 
 		if err != nil {
 			return "", err
 		}
-		return msg, nil
+		return msg.Params["username"], nil
 	}
 }
 
@@ -49,7 +68,7 @@ func serve(conn net.Conn, game *rps.Game) error {
 	reader := bufio.NewReader(conn)
 	writer := bufio.NewWriter(conn)
 
-	name, err := readPlayerName(reader, writer)
+	name, err := login(reader, writer)
 	if err != nil {
 		fmt.Printf("Error on login: %s", name)
 	}
