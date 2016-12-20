@@ -4,7 +4,9 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"github.com/howeyc/gopass"
 	"net"
+	"os"
 	"strings"
 )
 
@@ -65,6 +67,21 @@ func clientLoop(user string, password string, reader *bufio.Reader, writer *bufi
 	}
 }
 
+func getLogin() (string, string, error) {
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print("Username: ")
+	username, err := reader.ReadString('\n')
+	if err != nil {
+		return "", "", err
+	}
+	fmt.Print("Password: ")
+	password, err := gopass.GetPasswd()
+	if err != nil {
+		return "", "", err
+	}
+	return username, string(password), nil
+}
+
 func main() {
 	serverAddr := "localhost:9000"
 	conn, err := net.Dial("tcp", serverAddr)
@@ -72,8 +89,13 @@ func main() {
 		panic(fmt.Sprintf("Error connectinng to %s: %s", serverAddr, err))
 	}
 	fmt.Printf("Connected to %s!\n", serverAddr)
+	username, password, err := getLogin()
+
+	if err != nil {
+		panic(fmt.Sprintf("Error getting login information: %s", err))
+	}
 
 	reader := bufio.NewReader(conn)
 	writer := bufio.NewWriter(conn)
-	clientLoop("emo", "123", reader, writer)
+	clientLoop(username, password, reader, writer)
 }
