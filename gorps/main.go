@@ -59,16 +59,23 @@ func serve(conn net.Conn, game *rps.Game) error {
 
 	// TODO: Pull function
 	for {
-		message, err := reader.ReadString('\n')
+		msg, err := rps.ReadMsg(reader)
 		if err != nil {
 			game.RemovePlayer(player)
 			return err
 		}
 
-		if player.State == rps.STATE_PLAYING && message != "" {
-			player.Act(message)
+		if msg.Params["name"] != "action" {
+			game.RemovePlayer(player)
+			return rps.WriteMsg(writer, map[string]string{
+				"name":    "error",
+				"message": fmt.Sprintf("Unexpected message: %+v", msg),
+			})
 		}
 
+		if player.State == rps.STATE_PLAYING && msg != nil {
+			player.Act(msg.Params["action"])
+		}
 	}
 }
 
