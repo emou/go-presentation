@@ -29,30 +29,24 @@ https://golang.org/doc/install#testing
 
 ## Задача: клиент за играта
 
-Вашата задача ще е да напишете клиент за сървъра, написан на Golang. За да направите това, ще вие е
-нужно да знаете как да си говорите със сървъра.
+Вашата задача ще е да напишете клиент за сървъра, написан на Golang.
+Всъщност ще напишем версия на `nc` UNIX инструмента, който чете от стандартния вход
+(терминала) и пише в мрежови TCP сокет.
 
-### Инсталирайте кода на Камък-Ножица-Хартия сървъра
-
-```
-$ go get github.com/emou/go-presentation/gorps
-```
-
-Ако искате, можете да стартирате сървъра с:
 
 ### main.go
 
 Нека създадем директория `gorpsclient` с един файл `main.go`, където ще напишем кода на клиента.
 
 ```
-$ mkdir $GOPATH/src/github.com/emou/go-presentation/gorpsclient/
-$ cd $GOPATH/src/github.com/emou/go-presentation/gorpsclient/
+$ mkdir $GOPATH/src/gorpsclient/
+$ cd $GOPATH/src/gorpsclient/
 $ touch main.go
 ```
 
-Да добавим първоначалния код за клиента.
-Използваме пакета от стандартната библиотека [net](https://golang.org/pkg/net/), за да се свържем
-към сървъра.
+Да добавим първоначалния код за клиента. Използваме пакета от стандартната библиотека
+[net](https://golang.org/pkg/net/), за да се свържем към сървъра, който сме деплойнали на сървър с
+адрес 35.156.83.78:8080.
 
 ```
 package main
@@ -62,26 +56,36 @@ import (
 "net"
 )
 
+func clientloop() {
+}
+
 func main() {
-  serverAddr := "localhost:9000"
+  serverAddr := "35.156.83.78:8080"
   _, err := net.Dial("tcp", serverAddr)
   if err != nil {
     panic(fmt.Sprintf("Error connectinng to %s: %s", serverAddr, err))
   }
+  clientloop()
+  fmt.Printf("Connected to %s", serverAddr)
 }
 ```
 
 Да проверим, че се билдва и работи:
 ```
 $ go run main.go
+Connected to 35.156.83.78:8080
 ```
 
-Би трябвало програмата да се паникьоса
-```
-panic: Error connectinng to localhost:9000: dial tcp 127.0.0.1:9000: getsockopt: connection refused
-...
-```
+Оттук нататък задачата ви е в `clientloop` да:
 
+- Пуснете горутина, която в цикъл (до грешка) да чете от `conn`, използвайки `bufio.NewReader(conn).ReadString('\n')`
+- В главната горутина четете от терминала с `bufio.NewReader(os.Stdin)` и пишете в `conn` чрез `bufio.NewWriter(conn).Write([]byte(msg))`. Не забравяйте да използвате `Flush` метода на `bufio.Writer`.
+
+Линкове към документация на пкетите:
+- https://golang.org/pkg/bufio/
+- https://golang.org/pkg/net/
+- https://golang.org/pkg/fmt/
+- https://golang.org/pkg/os/
 
 ### Свързване към сървъра
 
