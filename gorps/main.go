@@ -65,7 +65,7 @@ func serve(conn net.Conn, game *rps.Game) error {
 			return err
 		}
 
-		if msg.Params["name"] != "action" {
+		if msg.Type != "action" {
 			game.RemovePlayer(player)
 			return rps.WriteMsg(writer, &rps.Message{
 				Type:   "error",
