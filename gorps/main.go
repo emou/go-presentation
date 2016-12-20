@@ -30,7 +30,7 @@ func readMsg(reader *bufio.Reader) (string, error) {
 
 func readPlayerName(reader *bufio.Reader, writer *bufio.Writer) (string, error) {
 	for {
-		err := writeMsg(writer, "LOGIN")
+		err := writeMsg(writer, "Enter player name: ")
 		if err != nil {
 			return "", err
 		}
@@ -95,7 +95,7 @@ func serve(conn net.Conn, game *rps.Game) error {
 
 func main() {
 	game := rps.NewGame()
-	listener, err := net.Listen("tcp", ":9000")
+	listener, err := net.Listen("tcp", ":8080")
 
 	fmt.Println("Listening on", listener.Addr())
 	if err != nil {
