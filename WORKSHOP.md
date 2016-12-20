@@ -56,19 +56,19 @@ import (
 	"net"
 )
 
-func clientloop() {
+func clientloop(conn net.Conn) {
 }
 
 func main() {
-  serverAddr := "35.156.83.78:8080"
-  conn, err := net.Dial("tcp", serverAddr)
-  if err != nil {
-    panic(fmt.Sprintf("Error connectinng to %s: %s", serverAddr, err))
-  }
+	serverAddr := "35.156.83.78:8080"
+	conn, err := net.Dial("tcp", serverAddr)
+	if err != nil {
+		panic(fmt.Sprintf("Error connectinng to %s: %s", serverAddr, err))
+	}
 	defer conn.Close()
 
-  fmt.Printf("Connected to %s", serverAddr)
-  clientloop()
+	fmt.Printf("Connected to %s", serverAddr)
+	clientloop(conn)
 }
 ```
 
