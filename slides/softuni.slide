@@ -634,3 +634,12 @@ int и uint са най-ефективния или естествен разм�
 .link https://play.golang.org/
 .link http://go-search.org/
 .link https://www.amazon.com/Programming-Language-Addison-Wesley-Professional-Computing/dp/0134190440
+
+* Workshop
+
+- Server source code:
+.link https://goo.gl/mhWlxX
+
+- Workshop
+.link http://goo.gl/Ba5thi
+.link https://github.com/emou/go-presentation/blob/master/WORKSHOP.md
